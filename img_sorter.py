@@ -4,7 +4,6 @@ from shutil import rmtree
 from glob import glob
 
 # The chapter sorter is what is actually used
-
 path = os.getcwd() + '/'
 # global variable used throughout program
 publications = []
@@ -12,35 +11,41 @@ pdict = {}
 
 
 # grabs data
-d = csv.DictReader(open('data.csv', 'r', encoding="utf-8",  errors ='replace'))
+d = csv.DictReader(open('snd39data.csv', 'r', encoding="utf-8-sig",  errors ='replace'))
 
 def unique_pubs():
 	# generates list of unique publications
 	for row in d:
-		if row['PUBLICATION'] not in publications:
-			publications.append(row['PUBLICATION']);
+		if row['Publication'] not in publications:
+			publications.append(row['Publication']);
+	# print(publications)
 
 def pub_dict():
 	# generates a dictonary with the publication and all reference numbers for it. 
 	# In english: it tells me all the images made by a publication
+	# unique_pubs()
 	for row in d:
-		pub = row['PUBLICATION'] 
+		pub = row['Publication'] 
 		ref = row['REF']
 		ref = num_format(ref)
 		
+
 		if ref not in pdict:
 			pdict[ref] = []
 
 		if pub not in pdict:
 			# pdict[ref].append(pub)
 			pdict[ref] = pub
-	# print(pdict)
+	print(pdict)
 	return pdict
 
 
 def create_directories():
+	unique_pubs()
+	print(publications)
 	# creates directories for unique pubs
-	os.makedirs(path + 'img/sorted/singles')
+	if not os.path.exists(path + 'img/sorted/singles'):
+		os.makedirs(path + 'img/sorted/singles')
 
 	for paper in publications:
 		if not os.path.exists(path + 'img/sorted/' + paper):
@@ -61,16 +66,20 @@ def move_imgs():
 	pub_dict()
 	# creates the dictonary, defined above
 
+	print(pdict)
 	paths = glob('img/unsorted/*')
 	for path in paths:
+		ref_num = path.replace("img/unsorted/", "")
 		ref_num = path[13:-4]
-
+		# print(ref_num)
+		# print(pdict)
+		# if ref_num[0:4] in pdict:
 		if ref_num[0:4] in pdict:
 			publication = pdict[ref_num[0:4]]
 			file = os.getcwd() + '/img/unsorted/' + ref_num + '.jpg'
 			output = os.getcwd() + '/img/sorted/' + publication + '/' + ref_num + '.jpg'
 			
-			print(file, output)
+			# print(file, output)
 			copyfile(file, output)
 
 		else:
@@ -95,7 +104,7 @@ def group_singles():
 				file = os.getcwd() + '/' + path + image
 				output =  os.getcwd() + '/img/sorted/singles/'  + image
 				copyfile(file, output)
-				print(file, output)
+				# print(file, output)
 				os.remove(file)
 			except:
 				print(file +' not moved ')
@@ -129,8 +138,8 @@ def check_img():
 	diff = list(set(total_unsorted) - set(total_sorted))
 	# diff2 = list(set(total_sorted) - set(total_unsorted))
 
-	print(format_sort)
-	print(format_unsort)
+	# print(format_sort)
+	# print(format_unsort)
 	print(diff)
 	# except:
 	# 	format_sort = "didn't move"
@@ -148,9 +157,11 @@ def check_img():
 
 # unique_pubs()
 # create_directories()
+
 # pub_dict()
 
 # move_imgs()
+
 # group_singles()
 # remove_empty()
 check_img()
